@@ -1,0 +1,173 @@
+# keyword_map.yaml — 검색 키워드 → 종목 매핑 시드 (20~30행)
+#
+# 스키마 (dictionary/loader.py::KeywordEntry):
+#   keyword: str        # 네이버 데이터랩에 조회할 검색어
+#   brand:   str         # 대표 브랜드명
+#   sector:  str          # universe.csv의 sector와 정렬
+#   direct:  [ticker...]  # 검색어가 곧 이 종목의 매출로 직결되는 티커
+#   proxy:   [ticker...]  # 간접/유사 수혜가 예상되는 티커 (direct보다 약한 연결)
+#   weight:  float        # 신호 집계 시 가중치 (기본 1.0)
+#
+# 아래는 시드 데이터. 나머지 종목/키워드는 사람이 리서치 후 이어서 채운다.
+# TODO(human): 유제품/주류/리테일/화장품 섹터 키워드 추가 확충
+
+- keyword: 불닭볶음면
+  brand: 삼양식품
+  sector: ramen_snack
+  direct: ["003230"]
+  proxy: []
+  weight: 1.0
+
+- keyword: 신라면
+  brand: 농심
+  sector: ramen_snack
+  direct: ["004370"]
+  proxy: []
+  weight: 1.0
+
+- keyword: 진라면
+  brand: 오뚜기
+  sector: ramen_snack
+  direct: ["007310"]
+  proxy: []
+  weight: 1.0
+
+- keyword: 비비고 만두
+  brand: CJ제일제당
+  sector: ramen_snack
+  direct: ["097950"]
+  proxy: []
+  weight: 1.0
+
+- keyword: 초코파이
+  brand: 오리온
+  sector: ramen_snack
+  direct: ["271560"]
+  proxy: []
+  weight: 0.8
+
+- keyword: 몽쉘
+  brand: 롯데웰푸드
+  sector: ramen_snack
+  direct: ["280360"]
+  proxy: []
+  weight: 0.6
+
+- keyword: 죠리퐁
+  brand: 크라운제과
+  sector: ramen_snack
+  direct: ["005740"]
+  proxy: []
+  weight: 0.5
+
+- keyword: 청정원
+  brand: 대상
+  sector: ramen_snack
+  direct: ["001680"]
+  proxy: []
+  weight: 0.7
+
+- keyword: 바나나맛우유
+  brand: 빙그레
+  sector: dairy_beverage
+  direct: ["005180"]
+  proxy: []
+  weight: 1.0
+
+- keyword: 상하목장
+  brand: 매일유업
+  sector: dairy_beverage
+  direct: ["267980"]
+  proxy: []
+  weight: 0.7
+
+- keyword: 남양유업 불가리스
+  brand: 남양유업
+  sector: dairy_beverage
+  direct: ["003920"]
+  proxy: []
+  weight: 0.6
+
+- keyword: 동원참치
+  brand: 동원F&B
+  sector: dairy_beverage
+  direct: ["049770"]
+  proxy: []
+  weight: 0.8
+
+- keyword: 참이슬
+  brand: 하이트진로
+  sector: alcohol_beverage
+  direct: ["000080"]
+  proxy: []
+  weight: 1.0
+
+- keyword: 테라 맥주
+  brand: 하이트진로
+  sector: alcohol_beverage
+  direct: ["000080"]
+  proxy: []
+  weight: 0.9
+
+- keyword: 칠성사이다
+  brand: 롯데칠성
+  sector: alcohol_beverage
+  direct: ["005300"]
+  proxy: []
+  weight: 0.8
+
+- keyword: 소주 다이어트
+  brand: ""
+  sector: alcohol_beverage
+  direct: []
+  proxy: ["000080", "005300"]
+  weight: 0.4
+
+- keyword: 삼립호빵
+  brand: SPC삼립
+  sector: bakery
+  direct: ["005610"]
+  proxy: []
+  weight: 0.9
+
+- keyword: 풀무원 두부
+  brand: 풀무원
+  sector: bakery
+  direct: ["017810"]
+  proxy: []
+  weight: 0.7
+
+- keyword: 편의점 신상
+  brand: ""
+  sector: retail
+  direct: []
+  proxy: ["007070", "282330"]
+  weight: 0.5
+
+- keyword: 이마트 할인
+  brand: 이마트
+  sector: retail
+  direct: ["139480"]
+  proxy: []
+  weight: 0.7
+
+- keyword: 설화수
+  brand: 아모레퍼시픽
+  sector: cosmetics
+  direct: ["090430"]
+  proxy: []
+  weight: 1.0
+
+- keyword: 후 화장품
+  brand: LG생활건강
+  sector: cosmetics
+  direct: ["051900"]
+  proxy: []
+  weight: 0.9
+
+- keyword: 올리브영 인기템
+  brand: ""
+  sector: cosmetics
+  direct: []
+  proxy: ["090430", "051900", "192820"]
+  weight: 0.5
