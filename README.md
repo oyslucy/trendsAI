@@ -53,8 +53,8 @@ make test   # pytest
 | `src/consumer_signal/collect/` | 네이버 데이터랩, KRX 수집기 |
 | `src/consumer_signal/normalize.py` | 이동창 z-score |
 | `src/consumer_signal/sentiment.py` | 감성 게이트 |
-| `src/consumer_signal/narrate.py` | LLM 기반 '왜' 요약 |
+| `src/consumer_signal/narrate.py` | LLM 기반 요약 |
 | `src/consumer_signal/snapshot.py` | 스냅샷 빌드/저장 |
 | `src/consumer_signal/dictionary/` | 키워드→종목 사전 로더/검증기 |
 | `src/consumer_signal/db/` | SQLAlchemy 모델/세션 |
-| `web/` | 프론트엔드 (미착수) |
+| `web/` | 프론트엔드 |
