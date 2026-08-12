@@ -216,3 +216,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# consumer_signal
+*.db
+data/snapshot_*.json
