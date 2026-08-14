@@ -21,6 +21,8 @@ class Node(BaseModel):
     z: float | None = None
     sentiment: int | None = None
     why: str | None = None
+    recommendation_score: float | None = None
+    low_confidence: bool | None = None
 
     sub: StockSub | None = None
     ticker: str | None = None

@@ -46,15 +46,21 @@ def build_dashboard_viewmodel(
     keywords: list[KeywordEntry],
     universe: list[UniverseEntry],
     *,
-    display_threshold: float = 1.0,
+    min_recommendation_score: float = 0.3,
 ) -> dict:
-    """Signal/flat/stocks 뷰모델을 조립한다. 계약은 세션 노트의 §2 참고."""
+    """Signal/flat/stocks 뷰모델을 조립한다. 계약은 세션 노트의 §2 참고.
+
+    signals/flat 분할은 raw z가 아니라 `recommend.py`가 계산한
+    recommendation_score(z×지속성×엔티티가중치, 절대검색량 미달이면 0)로 한다 —
+    raw z만 보면 "후 비첩"처럼 절대 검색량이 0~4인 노이즈가 z=3.8로 최상단에
+    뜨는 문제가 생긴다.
+    """
     universe_by_ticker = {u.ticker: u for u in universe}
     keyword_node_by_id = {n.id: n for n in snapshot.nodes if n.type == "keyword"}
     stock_node_by_ticker = {
         n.ticker: n for n in snapshot.nodes if n.type == "stock" and n.ticker is not None
     }
-    z_by_product = {n.id: (n.z or 0.0) for n in keyword_node_by_id.values()}
+    score_by_product = {n.id: (n.recommendation_score or 0.0) for n in keyword_node_by_id.values()}
 
     signals: list[dict] = []
     flat: list[dict] = []
@@ -65,13 +71,14 @@ def build_dashboard_viewmodel(
             continue
 
         z = node.z or 0.0
+        score = node.recommendation_score or 0.0
         kind, tickers = _kind_and_tickers(entry)
         ticker = tickers[0] if tickers else None
         company = (
             universe_by_ticker[ticker].name if ticker and ticker in universe_by_ticker else None
         )
 
-        if z >= display_threshold:
+        if score >= min_recommendation_score:
             stock_node = stock_node_by_ticker.get(ticker) if ticker else None
             # 거래량(KRX) 미배선/전부 0이면 stock.status가 None으로 나온다 —
             # 검색은 떴지만 시장 반응은 아직 미확인이라는 뜻이므로 lead로 폴백한다.
@@ -84,6 +91,7 @@ def build_dashboard_viewmodel(
                     "company": company,
                     "ticker": ticker,
                     "z": round(z, 3),
+                    "recommendation_score": round(score, 3),
                     "status": status,
                     "kind": kind,
                     "proxy_tickers": tickers if kind == "proxy" else [],
@@ -101,14 +109,17 @@ def build_dashboard_viewmodel(
                     "company": company,
                     "ticker": ticker,
                     "z": round(z, 3),
+                    "low_confidence": bool(node.low_confidence),
                     "sentiment": None,
                 }
             )
 
-    signals.sort(key=lambda s: s["z"], reverse=True)
+    signals.sort(key=lambda s: s["recommendation_score"], reverse=True)
     flat.sort(key=lambda s: s["z"], reverse=True)
 
-    # 리더보드 feed: 그 종목으로 이어지는 direct/proxy 링크 소스(product)를 z 내림차순 상위 N개.
+    # 리더보드 feed: 그 종목으로 이어지는 direct/proxy 링크 소스(product)를
+    # recommendation_score 내림차순 상위 N개 — 노이즈성 기여보다 신뢰할 만한
+    # 기여를 먼저 보여준다.
     feed_by_ticker: dict[str, list[str]] = {}
     for link in snapshot.links:
         if link.kind not in ("direct", "proxy"):
@@ -121,7 +132,7 @@ def build_dashboard_viewmodel(
             continue
         products = sorted(
             feed_by_ticker.get(node.ticker, []),
-            key=lambda p: z_by_product.get(p, 0.0),
+            key=lambda p: score_by_product.get(p, 0.0),
             reverse=True,
         )[:FEED_TOP_N]
         stocks.append(

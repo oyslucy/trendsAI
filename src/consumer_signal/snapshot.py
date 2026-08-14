@@ -45,8 +45,12 @@ def build_snapshot(
     keyword_no_signal: dict[str, bool],
     volume_z: dict[str, float],
     threshold: float,
+    keyword_recommendation: dict[str, float] | None = None,
+    keyword_low_confidence: dict[str, bool] | None = None,
 ) -> Snapshot:
     """실제 검색/거래량 z-score로 nodes/links를 조립한다."""
+    keyword_recommendation = keyword_recommendation or {}
+    keyword_low_confidence = keyword_low_confidence or {}
     nodes: list[Node] = []
     links: list[Link] = []
 
@@ -64,6 +68,8 @@ def build_snapshot(
                 label=entry.product,
                 z=z,
                 sentiment=keyword_sentiment.get(entry.product, 0),
+                recommendation_score=keyword_recommendation.get(entry.product, 0.0),
+                low_confidence=keyword_low_confidence.get(entry.product, False),
             )
         )
 

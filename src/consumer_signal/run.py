@@ -18,6 +18,7 @@ from consumer_signal.db.session import make_engine, make_session_factory
 from consumer_signal.dictionary.loader import KeywordEntry, load_keyword_map, load_universe
 from consumer_signal.dictionary.validator import validate_keyword_map
 from consumer_signal.normalize import is_no_signal, latest_zscore, rolling_zscore, winsorize
+from consumer_signal.recommend import compute_persistence, has_enough_volume, recommendation_score
 from consumer_signal.sentiment import gate_sentiment
 from consumer_signal.snapshot import build_snapshot, dump_debug_series, dump_snapshot
 
@@ -52,6 +53,31 @@ def _score_keywords(
     return keyword_z, keyword_no_signal, keyword_sentiment, z_series
 
 
+def _recommend_keywords(
+    keywords: list[KeywordEntry],
+    raw_search: dict[str, pd.Series],
+    keyword_z: dict[str, float],
+    z_series: dict[str, pd.Series],
+) -> tuple[dict[str, float], dict[str, bool]]:
+    """키워드별 추천 점수(z×지속성×엔티티 가중치)와 저신뢰 여부를 계산한다."""
+    keyword_recommendation: dict[str, float] = {}
+    keyword_low_confidence: dict[str, bool] = {}
+
+    for entry in keywords:
+        raw = raw_search.get(entry.product, pd.Series(dtype=float))
+        enough_volume = has_enough_volume(raw)
+        keyword_low_confidence[entry.product] = not enough_volume
+        persistence = compute_persistence(z_series.get(entry.product, pd.Series(dtype=float)))
+        keyword_recommendation[entry.product] = recommendation_score(
+            keyword_z.get(entry.product, 0.0),
+            entry.weight,
+            persistence,
+            enough_volume=enough_volume,
+        )
+
+    return keyword_recommendation, keyword_low_confidence
+
+
 def run_pipeline(target_date: Date, settings: Settings) -> Path:
     """collect → normalize → sentiment(stub) → narrate(stub) → snapshot 순으로 실행한다."""
     keywords = load_keyword_map(DATA_DIR / "keyword_map.yaml")
@@ -76,6 +102,12 @@ def run_pipeline(target_date: Date, settings: Settings) -> Path:
     )
     logger.info("normalize: {} keyword entries scored", len(keyword_z))
 
+    keyword_recommendation, keyword_low_confidence = _recommend_keywords(
+        keywords, raw_search, keyword_z, z_series
+    )
+    n_recommended = sum(1 for score in keyword_recommendation.values() if score > 0)
+    logger.info("recommend: {} keywords pass the watchlist bar", n_recommended)
+
     tickers = [u.ticker for u in universe]
     raw_volume = krx.fetch_volume_series(tickers, start_date, end_date)
     volume_z = {
@@ -96,6 +128,8 @@ def run_pipeline(target_date: Date, settings: Settings) -> Path:
         keyword_no_signal,
         volume_z,
         threshold=settings.z_threshold,
+        keyword_recommendation=keyword_recommendation,
+        keyword_low_confidence=keyword_low_confidence,
     )
 
     dump_debug_series(target_date, raw_search, z_series, DEBUG_DIR)
