@@ -26,6 +26,7 @@ class Node(BaseModel):
     ticker: str | None = None
     sector: str | None = None
     agg: float | None = None
+    volume_z: float | None = None
     status: StockStatus | None = None
 
 

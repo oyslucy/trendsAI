@@ -220,6 +220,8 @@ __marimo__/
 # consumer_signal
 *.db
 data/snapshot_*.json
+cache/
+debug/
 
 # Claude Code project instructions (local only, not for GitHub)
 CLAUDE.md

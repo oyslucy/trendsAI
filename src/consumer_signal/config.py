@@ -31,6 +31,10 @@ class Settings(BaseSettings):
     )
     z_window: int = Field(default=30, description="z-score 이동창 길이(일)")
     z_threshold: float = Field(default=2.0, description="신호로 간주할 z-score 임계값")
+    window_buffer_days: int = Field(
+        default=60,
+        description="z_window에 더해 수집할 여유일수 (안정적인 z 계산을 위한 창)",
+    )
     log_level: str = Field(default="INFO", description="로그 레벨")
 
 
