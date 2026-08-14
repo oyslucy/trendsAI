@@ -34,7 +34,7 @@ def test_zscore_invariant_to_positive_scaling() -> None:
 
     전 구간이 같은 양의 상수로 스케일되면(같은 요청 안에서는 항상 그렇다)
     평균·표준편차도 같은 비율로 스케일되어 z는 상쇄되어 동일해야 한다.
-    이 회귀 테스트가 깨지면 collect/naver.py의 "요청당 한 번" 규칙이
+    이 회귀 테스트가 깨지면 collect/google_trends.py의 "요청당 한 번" 규칙이
     무의미해진다.
     """
     series = pd.Series([1.0, 2.0, 1.0, 3.0, 1.0, 1.0, 50.0])

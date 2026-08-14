@@ -16,6 +16,10 @@ class KeywordEntry(BaseModel):
     direct: list[str] = Field(default_factory=list)
     proxy: list[str] = Field(default_factory=list)
     weight: float = 1.0
+    aliases: list[str] = Field(
+        default_factory=list,
+        description="구글 트렌드 term에 OR(+)로 묶을 동의어/변형어. 없으면 keyword만 조회.",
+    )
 
 
 class UniverseEntry(BaseModel):

@@ -1,7 +1,7 @@
 # keyword_map.yaml — 검색 키워드 → 종목 매핑 시드 (20~30행)
 #
 # 스키마 (dictionary/loader.py::KeywordEntry):
-#   keyword: str        # 네이버 데이터랩에 조회할 검색어
+#   keyword: str        # 구글 트렌드에 조회할 검색어
 #   brand:   str         # 대표 브랜드명
 #   sector:  str          # universe.csv의 sector와 정렬
 #   direct:  [ticker...]  # 검색어가 곧 이 종목의 매출로 직결되는 티커

@@ -15,6 +15,6 @@ def data_dir() -> Path:
 @pytest.fixture(autouse=True)
 def _isolated_env(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     """실제 셸 환경변수·`.env`가 테스트에 새어들지 않도록 격리한다."""
-    for key in ("NAVER_CLIENT_ID", "NAVER_CLIENT_SECRET", "LLM_API_KEY"):
+    for key in ("LLM_API_KEY", "GOOGLE_TRENDS_GEO"):
         monkeypatch.delenv(key, raising=False)
     monkeypatch.chdir(tmp_path)

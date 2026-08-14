@@ -1,7 +1,7 @@
 [project]
 name = "consumer-signal"
 version = "0.1.0"
-description = "소비재 검색 신호 스크리너 — 네이버 데이터랩 검색 트렌드와 KRX 거래 데이터를 결합해 종목 신호 스냅샷을 생성한다."
+description = "소비재 검색 신호 스크리너 — 구글 트렌드 검색 트렌드와 KRX 거래 데이터를 결합해 종목 신호 스냅샷을 생성한다."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -13,6 +13,7 @@ dependencies = [
     "pandas>=2.2",
     "loguru>=0.7",
     "pyyaml>=6.0",
+    "pytrends>=4.9.2",
 ]
 
 [project.scripts]

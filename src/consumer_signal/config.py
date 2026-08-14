@@ -19,9 +19,11 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    naver_client_id: str = Field(..., description="네이버 데이터랩 API client id")
-    naver_client_secret: str = Field(..., description="네이버 데이터랩 API client secret")
     llm_api_key: str = Field(..., description="'왜' 요약에 쓰는 LLM API key")
+
+    google_trends_geo: str = Field(
+        default="KR", description="구글 트렌드 조회 지역 코드 (빈 문자열이면 전세계)"
+    )
 
     db_url: str = Field(
         default="sqlite:///./data/signal.db",
@@ -39,6 +41,6 @@ def get_settings() -> Settings:
     except Exception as exc:  # noqa: BLE001
         raise RuntimeError(
             "필수 설정이 누락되었습니다. `.env.example`을 `.env`로 복사한 뒤 "
-            "naver_client_id, naver_client_secret, llm_api_key 를 채워주세요.\n"
+            "llm_api_key 를 채워주세요.\n"
             f"원본 에러: {exc}"
         ) from exc
