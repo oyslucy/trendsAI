@@ -1,591 +1,547 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>consumer-signal · 검증 대시보드</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Consumer Signal · 소비재 검색 신호 브리핑</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <style>
-  :root {
-    --bg: #0b0e14;
-    --bg-elevated: #11151f;
-    --bg-hover: #171c29;
-    --border: #232838;
-    --text: #e6e9f0;
-    --text-dim: #8b93a7;
-    --accent: #5b8cff;
-    --lead: #35c98f;
-    --react: #ffb454;
-    --neg: #ff5f6d;
-    --mono: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
-    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  :root{
+    --ink:#0b0e13; --ink-2:#10141c; --panel:#141922; --panel-2:#1a212c;
+    --line:rgba(255,255,255,.07); --line-2:rgba(255,255,255,.13);
+    --txt:#e9eef5; --dim:#96a2b4; --faint:#5c6676;
+    --kw:#f2b23e; --direct:#35b7a3; --proxy:#9b87f5; --slate:#8592a6; --bad:#e5484d;
+    --mono:"JetBrains Mono",monospace;
+    --disp:"Space Grotesk","Pretendard Variable",sans-serif;
+    --body:"Pretendard Variable",Pretendard,-apple-system,system-ui,sans-serif;
   }
-
-  * { box-sizing: border-box; }
-
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    font-size: 14px;
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:
+      radial-gradient(1100px 700px at 78% -8%, rgba(53,183,163,.05), transparent 60%),
+      radial-gradient(900px 700px at 4% 108%, rgba(155,135,245,.05), transparent 55%),
+      var(--ink);
+    color:var(--txt); font-family:var(--body); line-height:1.5;
+    -webkit-font-smoothing:antialiased;
   }
+  .wrap{max-width:1240px;margin:0 auto;padding:0 28px 80px}
 
-  header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 12px 20px;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg-elevated);
+  /* header */
+  header{display:flex;align-items:center;justify-content:space-between;gap:20px;
+    padding:22px 0 20px;position:sticky;top:0;z-index:20;
+    background:linear-gradient(180deg,var(--ink) 70%,rgba(11,14,19,0));backdrop-filter:blur(2px)}
+  .brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .brand .mark{font-family:var(--disp);font-weight:600;font-size:19px;letter-spacing:-.01em}
+  .brand .sub{font-size:13px;color:var(--dim)}
+  .head-right{display:flex;align-items:center;gap:14px}
+  .date-pill{font-family:var(--mono);font-size:12px;color:var(--txt);background:var(--panel);
+    border:1px solid var(--line);padding:7px 12px;border-radius:8px}
+  select.date-pill{cursor:pointer;appearance:none;-webkit-appearance:none;padding-right:26px;
+    background-image:linear-gradient(45deg,transparent 50%,var(--dim) 50%),linear-gradient(135deg,var(--dim) 50%,transparent 50%);
+    background-position:calc(100% - 13px) center,calc(100% - 8px) center;background-size:5px 5px;background-repeat:no-repeat}
+  select.date-pill:hover{border-color:var(--line-2)}
+  .sample{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--dim);
+    display:inline-flex;align-items:center;gap:6px}
+  .sample::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--kw)}
+
+  .summary{font-family:var(--mono);font-size:12.5px;color:var(--dim);
+    border-top:1px solid var(--line);padding-top:14px;margin-bottom:26px;
+    display:flex;gap:26px;flex-wrap:wrap}
+  .summary b{color:var(--txt);font-weight:500}
+  .summary .hot{color:var(--kw)}
+
+  /* section shell */
+  .sec{margin:38px 0}
+  .sec-h{display:flex;align-items:baseline;gap:12px;margin:0 0 16px}
+  .sec-h .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--kw)}
+  .sec-h h2{font-family:var(--disp);font-weight:600;font-size:17px;margin:0;letter-spacing:-.01em}
+  .sec-h .note{font-size:12px;color:var(--faint);margin-left:auto}
+
+  /* HERO */
+  .hero{position:relative;overflow:hidden;border:1px solid var(--line-2);border-radius:18px;
+    background:linear-gradient(135deg,var(--panel),var(--ink-2));
+    padding:26px 28px;display:grid;grid-template-columns:1.15fr 1fr;gap:28px;align-items:center}
+  .hero::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(600px 300px at 90% 10%,rgba(242,178,62,.09),transparent 60%);pointer-events:none}
+  .hero-eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--kw);margin-bottom:12px}
+  .hero-name{font-family:var(--disp);font-weight:700;font-size:40px;line-height:1.05;letter-spacing:-.02em;margin:0}
+  .hero-brand{font-size:14px;color:var(--dim);margin-top:6px}
+  .hero-z{display:flex;align-items:baseline;gap:10px;margin:18px 0 14px}
+  .hero-z .val{font-family:var(--mono);font-weight:700;font-size:46px;color:var(--kw);letter-spacing:-.02em}
+  .hero-z .unit{font-family:var(--mono);font-size:15px;color:var(--dim)}
+  .hero-z .arrow{color:var(--direct);font-size:22px}
+  .hero-why{font-size:14px;color:var(--txt);max-width:44ch;margin:0 0 18px;line-height:1.6}
+  .hero-why .tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--kw);display:block;margin-bottom:6px}
+  .chain-to{display:inline-flex;align-items:center;gap:10px;background:var(--panel-2);
+    border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+  .chain-to .lead{font-size:12px;color:var(--dim)}
+  .chain-to .tkr{font-family:var(--mono);font-size:13px;color:var(--direct);font-weight:500}
+  .chain-to .co{font-size:14px;font-weight:500}
+  .badge{font-family:var(--mono);font-size:10px;letter-spacing:.04em;padding:3px 8px;border-radius:20px;border:1px solid}
+  .b-react{color:var(--direct);border-color:rgba(53,183,163,.4);background:rgba(53,183,163,.08)}
+  .b-lead{color:var(--kw);border-color:rgba(242,178,62,.4);background:rgba(242,178,62,.08)}
+  .hero-spark{position:relative;height:190px}
+
+  /* signal cards */
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .card{border:1px solid var(--line);border-radius:14px;background:var(--panel);
+    padding:16px 16px 14px;position:relative;opacity:0;transform:translateY(10px);
+    animation:rise .5s cubic-bezier(.2,.7,.2,1) forwards}
+  .card:hover{border-color:var(--line-2)}
+  .card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+  .card .pname{font-family:var(--disp);font-weight:600;font-size:16px;letter-spacing:-.01em}
+  .card .bname{font-size:11.5px;color:var(--dim);margin-top:2px}
+  .card .z{font-family:var(--mono);font-weight:600;font-size:20px}
+  .card .z.pos{color:var(--kw)} .card .z.flat{color:var(--slate)}
+  .card .spark{height:46px;margin:12px 0 12px}
+  .card .foot{display:flex;align-items:center;justify-content:space-between;gap:8px;
+    border-top:1px solid var(--line);padding-top:11px}
+  .card .to{font-family:var(--mono);font-size:11.5px;color:var(--dim);display:flex;align-items:center;gap:7px}
+  .card .to .t{color:var(--direct)} .card .to .t.px{color:var(--proxy)}
+  .card .fan{font-family:var(--mono);font-size:10px;color:var(--proxy)}
+
+  /* distribution */
+  .dist-wrap{display:grid;grid-template-columns:1fr;gap:0}
+  .dist{width:100%;height:150px}
+  .dist-legend{font-family:var(--mono);font-size:11px;color:var(--faint);display:flex;gap:20px;margin-top:4px}
+  .dist-legend .k{display:inline-flex;align-items:center;gap:6px}
+  .dist-legend .d{width:8px;height:8px;border-radius:50%}
+
+  /* value chain flow */
+  .flow-shell{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:8px 6px 4px}
+  .flow{width:100%;height:420px;display:block}
+  .flow-cols{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);
+    display:flex;justify-content:space-around;padding:0 4px 8px}
+
+  /* leaderboard */
+  .lb{display:flex;flex-direction:column;gap:2px}
+  .lb-row{display:grid;grid-template-columns:26px 150px 1fr auto;align-items:center;gap:14px;
+    padding:11px 12px;border-radius:9px;border:1px solid transparent}
+  .lb-row:hover{background:var(--panel);border-color:var(--line)}
+  .lb-row .rk{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  .lb-row .co{display:flex;flex-direction:column}
+  .lb-row .co .n{font-size:14px;font-weight:500}
+  .lb-row .co .t{font-family:var(--mono);font-size:10px;color:var(--dim)}
+  .lb-bar-track{height:8px;background:var(--panel-2);border-radius:5px;overflow:hidden}
+  .lb-bar{height:100%;border-radius:5px;width:0;
+    background:linear-gradient(90deg,var(--direct),var(--kw));
+    transition:width 1.1s cubic-bezier(.2,.7,.2,1)}
+  .lb-row .rt{display:flex;align-items:center;gap:12px}
+  .lb-row .agg{font-family:var(--mono);font-size:14px;color:var(--txt);min-width:42px;text-align:right}
+  .lb-feed{font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:3px}
+
+  /* detail */
+  details{border:1px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden}
+  summary{cursor:pointer;padding:14px 18px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--dim);list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary::before{content:"▸ ";color:var(--faint)}
+  details[open] summary::before{content:"▾ "}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:9px 18px;border-top:1px solid var(--line)}
+  th{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-weight:400}
+  td.num{font-family:var(--mono);text-align:right}
+  .pending{font-family:var(--mono);font-size:11px;color:var(--faint)}
+
+  /* fetch states (loading / empty / no-snapshot) */
+  .state-msg{border:1px dashed var(--line-2);border-radius:14px;padding:44px 24px;text-align:center;color:var(--dim)}
+  .state-msg .big{font-family:var(--disp);font-weight:600;font-size:16px;color:var(--txt);margin-bottom:6px}
+  .state-msg .small{font-size:12.5px}
+  .skel{background:linear-gradient(100deg,var(--panel) 30%,var(--panel-2) 50%,var(--panel) 70%);
+    background-size:220% 100%;animation:shimmer 1.5s ease-in-out infinite;border-radius:8px}
+  .skel-hero{height:280px;border-radius:18px}
+  .skel-card{height:170px;border-radius:14px}
+  @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+  @keyframes rise{to{opacity:1;transform:none}}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  @media (max-width:900px){
+    .hero{grid-template-columns:1fr}.hero-spark{height:150px}
+    .cards{grid-template-columns:1fr 1fr}
+    .lb-row{grid-template-columns:22px 1fr auto}.lb-row .lb-bar-track{display:none}
   }
-
-  header h1 {
-    font-size: 15px;
-    font-weight: 600;
-    margin: 0;
-    white-space: nowrap;
-  }
-
-  select, button {
-    background: var(--bg);
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 6px 10px;
-    font-family: var(--mono);
-    font-size: 13px;
-  }
-
-  button { cursor: pointer; }
-  button:hover, select:hover { border-color: var(--accent); }
-
-  nav.tabs {
-    display: flex;
-    gap: 4px;
-    margin-left: auto;
-  }
-
-  nav.tabs button {
-    border: none;
-    border-radius: 6px 6px 0 0;
-    background: transparent;
-    color: var(--text-dim);
-  }
-
-  nav.tabs button.active {
-    background: var(--bg);
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-bottom: 1px solid var(--bg);
-  }
-
-  main {
-    padding: 20px;
-  }
-
-  .tab-panel { display: none; }
-  .tab-panel.active { display: block; }
-
-  .empty-state {
-    color: var(--text-dim);
-    padding: 40px;
-    text-align: center;
-    border: 1px dashed var(--border);
-    border-radius: 8px;
-  }
-
-  section.panel {
-    background: var(--bg-elevated);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    margin-bottom: 16px;
-    overflow: hidden;
-  }
-
-  section.panel h2 {
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-dim);
-    margin: 0;
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  th, td {
-    text-align: left;
-    padding: 7px 14px;
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-  }
-
-  th {
-    color: var(--text-dim);
-    font-weight: 500;
-    font-size: 12px;
-    position: sticky;
-    top: 0;
-    background: var(--bg-elevated);
-  }
-
-  tbody tr { cursor: pointer; }
-  tbody tr:hover { background: var(--bg-hover); }
-  tbody tr.selected { background: var(--bg-hover); outline: 1px solid var(--accent); }
-
-  .mono { font-family: var(--mono); }
-  .dim { color: var(--text-dim); }
-  .no-signal { color: var(--text-dim); font-style: italic; }
-
-  .badge {
-    display: inline-block;
-    padding: 1px 8px;
-    border-radius: 10px;
-    font-size: 11px;
-    font-family: var(--mono);
-  }
-  .badge.lead { background: rgba(53, 201, 143, 0.15); color: var(--lead); }
-  .badge.react { background: rgba(255, 180, 84, 0.15); color: var(--react); }
-  .badge.sent-1 { background: rgba(255, 95, 109, 0.15); color: var(--neg); }
-  .badge.sent0 { background: rgba(139, 147, 167, 0.15); color: var(--text-dim); }
-  .badge.sent1 { background: rgba(53, 201, 143, 0.15); color: var(--lead); }
-
-  #sparkline-panel {
-    padding: 14px;
-    display: none;
-  }
-  #sparkline-panel.visible { display: block; }
-  #sparkline-panel h3 { margin: 0 0 8px; font-size: 13px; }
-  #sparkline-panel .charts { display: flex; gap: 20px; flex-wrap: wrap; }
-  #sparkline-panel canvas {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-  }
-  #sparkline-panel figcaption { color: var(--text-dim); font-size: 11px; margin-top: 4px; }
-
-  #network-wrap { position: relative; }
-  #network-canvas {
-    width: 100%;
-    height: 70vh;
-    display: block;
-    background: var(--bg-elevated);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-  }
-
-  #tooltip {
-    position: absolute;
-    pointer-events: none;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 6px 10px;
-    font-family: var(--mono);
-    font-size: 12px;
-    display: none;
-    z-index: 10;
-  }
-
-  #drawer {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 280px;
-    background: var(--bg-elevated);
-    border-left: 1px solid var(--border);
-    padding: 16px;
-    transform: translateX(100%);
-    transition: transform 0.15s ease;
-    overflow-y: auto;
-  }
-  #drawer.open { transform: translateX(0); }
-  #drawer dt { color: var(--text-dim); font-size: 11px; margin-top: 8px; }
-  #drawer dd { margin: 2px 0 0; font-family: var(--mono); }
-
-  @media (prefers-reduced-motion: reduce) {
-    #drawer { transition: none; }
-  }
+  @media (max-width:600px){.cards{grid-template-columns:1fr}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.skel{background-position:0 0}}
 </style>
 </head>
 <body>
-<header>
-  <h1>consumer-signal · 검증 대시보드</h1>
-  <select id="date-select"></select>
-  <nav class="tabs">
-    <button data-tab="signals" class="active">Signals</button>
-    <button data-tab="network">Network</button>
-  </nav>
-</header>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <span class="mark">Consumer Signal</span>
+      <span class="sub">소비재 검색 신호 브리핑</span>
+    </div>
+    <div class="head-right">
+      <select class="date-pill" id="date-select"></select>
+    </div>
+  </header>
 
-<main>
-  <div id="empty" class="empty-state" style="display:none;"></div>
+  <div class="summary" id="summary"></div>
 
-  <div id="tab-signals" class="tab-panel active">
-    <section class="panel">
-      <h2>Keywords (z 내림차순)</h2>
-      <table id="keyword-table">
-        <thead>
-          <tr>
-            <th>키워드</th><th>브랜드</th><th>z</th><th>sentiment</th>
-            <th>direct</th><th>proxy</th><th>no_signal</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-      <div id="sparkline-panel">
-        <h3 id="sparkline-title"></h3>
-        <div class="charts">
-          <figure>
-            <canvas id="chart-raw" width="360" height="90"></canvas>
-            <figcaption>raw ratio (트레일링)</figcaption>
-          </figure>
-          <figure>
-            <canvas id="chart-z" width="360" height="90"></canvas>
-            <figcaption>z-score (±5σ winsorized)</figcaption>
-          </figure>
+  <div id="state" class="state-msg" style="display:none"></div>
+
+  <div id="content">
+    <!-- HERO -->
+    <section class="hero" id="hero"></section>
+
+    <!-- SIGNAL CARDS + DISTRIBUTION -->
+    <section class="sec">
+      <div class="sec-h"><span class="eyebrow">Today</span><h2>오늘 뜬 신호</h2>
+        <span class="note">원 크기·값 = 검색 z · 검색이 실적보다 먼저 움직입니다</span></div>
+      <div class="cards" id="cards"></div>
+    </section>
+
+    <section class="sec">
+      <div class="sec-h"><span class="eyebrow">Shape</span><h2>신호 분포</h2>
+        <span class="note">대부분 평평, 소수만 튄다 — 그 소수가 볼 것</span></div>
+      <div class="dist-wrap">
+        <svg class="dist" id="dist" viewBox="0 0 1000 150" preserveAspectRatio="none"></svg>
+        <div class="dist-legend">
+          <span class="k"><span class="d" style="background:var(--kw)"></span>유의 신호 (z ≥ 1.5)</span>
+          <span class="k"><span class="d" style="background:var(--slate)"></span>평상 범위</span>
         </div>
       </div>
     </section>
 
-    <section class="panel">
-      <h2>Stocks (agg 내림차순)</h2>
-      <table id="stock-table">
-        <thead>
-          <tr>
-            <th>티커</th><th>종목명</th><th>섹터</th><th>agg</th><th>거래량 z</th><th>status</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+    <!-- VALUE CHAIN FLOW -->
+    <section class="sec">
+      <div class="sec-h"><span class="eyebrow">Trace</span><h2>밸류체인 흐름</h2>
+        <span class="note">검색 급등이 어느 상장사로 흘러가는가</span></div>
+      <div class="flow-shell">
+        <svg class="flow" id="flow" viewBox="0 0 1000 420"></svg>
+        <div class="flow-cols"><span>뜨는 제품</span><span>브랜드</span><span>종목</span></div>
+      </div>
+    </section>
+
+    <!-- LEADERBOARD -->
+    <section class="sec">
+      <div class="sec-h"><span class="eyebrow">Rank</span><h2>관심도 상위 종목</h2>
+        <span class="note">막대 = 연결된 검색 신호 합 · 배지 = 시장 반응 단계</span></div>
+      <div class="lb" id="lb"></div>
+    </section>
+
+    <!-- DETAIL -->
+    <section class="sec">
+      <details>
+        <summary>전체 키워드·종목 상세</summary>
+        <table id="detail"></table>
+      </details>
     </section>
   </div>
-
-  <div id="tab-network" class="tab-panel">
-    <div id="network-wrap">
-      <canvas id="network-canvas"></canvas>
-      <div id="tooltip"></div>
-      <div id="drawer"></div>
-    </div>
-  </div>
-</main>
+</div>
 
 <script>
 "use strict";
+const C={kw:'#f2b23e',direct:'#35b7a3',proxy:'#9b87f5',slate:'#8592a6',bad:'#e5484d'};
+const $=s=>document.querySelector(s);
+const reduceMotion=()=>matchMedia('(prefers-reduced-motion:reduce)').matches;
 
-const state = { snapshot: null, series: {}, sim: null };
-
-function fmt(n, digits = 2) {
-  if (n === null || n === undefined || Number.isNaN(n)) return "–";
-  return Number(n).toFixed(digits);
-}
-
-async function fetchJSON(url) {
-  const resp = await fetch(url);
-  if (resp.status === 404) return null;
+/* ---------- fetch helpers ---------- */
+async function fetchJSON(url){
+  const resp=await fetch(url);
+  if(resp.status===404)return null;
+  if(!resp.ok)throw new Error('fetch failed: '+url+' ('+resp.status+')');
   return resp.json();
 }
 
-function showEmpty(message) {
-  document.getElementById("empty").style.display = "block";
-  document.getElementById("empty").textContent = message;
-  document.getElementById("tab-signals").style.display = "none";
-  document.getElementById("tab-network").style.display = "none";
+/* ---------- sparkline (unchanged from design spec) ---------- */
+function sparkPath(data,w,h,pad=3){
+  const mn=Math.min(...data),mx=Math.max(...data),rg=(mx-mn)||1;
+  const x=i=>pad+i*(w-2*pad)/(data.length-1);
+  const y=v=>h-pad-((v-mn)/rg)*(h-2*pad);
+  let d='M'+x(0)+' '+y(data[0]);
+  for(let i=1;i<data.length;i++)d+=' L'+x(i)+' '+y(data[i]);
+  return {line:d,area:d+` L${x(data.length-1)} ${h} L${x(0)} ${h} Z`,ex:x(data.length-1),ey:y(data[data.length-1])};
+}
+function spark(el,data,color,animate){
+  const w=el.clientWidth||300,h=el.clientHeight||46;
+  if(!data||data.length<2){el.innerHTML='';return;}
+  const p=sparkPath(data,w,h);
+  const id='g'+Math.random().toString(36).slice(2,7);
+  el.innerHTML=`<svg width="100%" height="100%" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+    <defs><linearGradient id="${id}" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="${color}" stop-opacity=".28"/>
+      <stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>
+    <path d="${p.area}" fill="url(#${id})"/>
+    <path class="ln" d="${p.line}" fill="none" stroke="${color}" stroke-width="1.8"
+      stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${p.ex}" cy="${p.ey}" r="2.8" fill="${color}"/></svg>`;
+  if(animate&&!reduceMotion()){const ln=el.querySelector('.ln');const len=ln.getTotalLength();
+    ln.style.strokeDasharray=len;ln.style.strokeDashoffset=len;
+    ln.style.animation='draw 1.2s ease .2s forwards';}
 }
 
-function hideEmpty() {
-  document.getElementById("empty").style.display = "none";
-  document.getElementById("tab-signals").style.display = "";
-  document.getElementById("tab-network").style.display = "";
+/* ---------- page states ---------- */
+function showState(big,small){
+  $('#content').style.display='none';
+  const el=$('#state');
+  el.style.display='block';
+  el.innerHTML=`<div class="big">${big}</div><div class="small">${small||''}</div>`;
+}
+function hideState(){
+  $('#state').style.display='none';
+  $('#content').style.display='block';
+}
+function showSkeleton(){
+  hideState();
+  $('#summary').innerHTML='';
+  $('#hero').innerHTML='<div class="skel skel-hero"></div>';
+  $('#cards').innerHTML=Array.from({length:5}).map(()=>'<div class="skel skel-card"></div>').join('');
+  $('#dist').innerHTML='';$('#flow').innerHTML='';$('#lb').innerHTML='';$('#detail').innerHTML='';
 }
 
-async function loadDate(date) {
-  const [snapshot, series] = await Promise.all([
-    fetchJSON(`/api/snapshot/${date}`),
-    fetchJSON(`/api/series/${date}`),
-  ]);
-  if (!snapshot || snapshot.nodes.length === 0) {
-    showEmpty(snapshot ? `${date} 스냅샷이 비어 있습니다.` : `${date} 스냅샷이 없습니다.`);
+/* ---------- summary ---------- */
+function renderSummary(vm){
+  const{signals}=vm;
+  const nHot=signals.filter(s=>s.z>=1.5).length;
+  const top=signals[0];
+  const parts=[`<span><b class="hot">${nHot}</b>개 유의 신호 감지</span>`];
+  if(top)parts.push(`<span>최고 신호 <b>${top.product}</b> <b class="hot">z ${top.z.toFixed(2)}</b></span>`);
+  parts.push(`<span>선행 후보 <b>${signals.filter(s=>s.status==='lead').length}</b> · 반응 시작 <b>${signals.filter(s=>s.status==='react').length}</b></span>`);
+  parts.push(`<span class="pending">감성 게이트 P1 대기중</span>`);
+  $('#summary').innerHTML=parts.join('');
+}
+
+/* ---------- hero ---------- */
+function renderHero(vm){
+  const H=vm.signals[0];
+  if(!H){
+    $('#hero').innerHTML=`<div class="state-msg" style="border:none;padding:34px 4px;text-align:left">
+      <div class="big">오늘은 임계를 넘은 신호가 없습니다</div>
+      <div class="small">아래 분포에서 전체 키워드의 z 위치는 계속 확인할 수 있습니다</div></div>`;
     return;
   }
-  hideEmpty();
-  state.snapshot = snapshot;
-  state.series = series || {};
-  renderSignals();
-  renderNetwork();
+  const chain=H.ticker
+    ? `<span class="co">${H.company??'—'}</span><span class="tkr">${H.ticker}</span>
+       <span class="badge ${H.status==='react'?'b-react':'b-lead'}">${H.status==='react'?'반응 시작':'선행 후보'}</span>`
+    : `<span class="co">연결된 종목 없음</span>`;
+  const why=H.why?`<p class="hero-why"><span class="tag">왜 · 신호 맥락</span>${H.why}</p>`:'';
+  $('#hero').innerHTML=`
+    <div style="position:relative;z-index:1">
+      <div class="hero-eyebrow">오늘의 최고 신호</div>
+      <h1 class="hero-name">${H.product}</h1>
+      <div class="hero-brand">${H.brand} · ${H.sector}</div>
+      <div class="hero-z"><span class="arrow">▲</span><span class="val" id="hz">0.00</span><span class="unit">σ</span></div>
+      ${why}
+      <div class="chain-to"><span class="lead">밸류체인 →</span>${chain}</div>
+    </div>
+    <div class="hero-spark" id="herospark"></div>`;
+  spark($('#herospark'),H.series,C.kw,true);
+  (function(){const el=$('#hz');const t=H.z;let s=null;
+    if(reduceMotion()){el.textContent=t.toFixed(2);return;}
+    function step(ts){if(!s)s=ts;const k=Math.min((ts-s)/900,1);
+      el.textContent=(t*(1-Math.pow(1-k,3))).toFixed(2);if(k<1)requestAnimationFrame(step);}
+    requestAnimationFrame(step);})();
 }
 
-// ---------- Signals tab ----------
-
-function isNoSignal(keyword) {
-  const s = state.series[keyword];
-  if (!s || !s.raw || s.raw.length === 0) return true;
-  return s.raw.every((v) => v === 0);
-}
-
-function renderSignals() {
-  const { nodes, links } = state.snapshot;
-  const keywordNodes = nodes.filter((n) => n.type === "keyword").sort((a, b) => (b.z ?? 0) - (a.z ?? 0));
-
-  const linksByKeyword = {};
-  for (const l of links) {
-    if (l.kind === "direct" || l.kind === "proxy") {
-      (linksByKeyword[l.source] ??= { direct: [], proxy: [] })[l.kind].push(l.target);
-    }
-  }
-
-  const kwBody = document.querySelector("#keyword-table tbody");
-  kwBody.innerHTML = "";
-  for (const n of keywordNodes) {
-    const noSignal = isNoSignal(n.id);
-    const mapped = linksByKeyword[n.id] || { direct: [], proxy: [] };
-    const tr = document.createElement("tr");
-    tr.dataset.keyword = n.id;
-    tr.innerHTML = `
-      <td>${n.label}</td>
-      <td class="dim">${n.why ?? ""}</td>
-      <td class="mono">${fmt(n.z)}</td>
-      <td><span class="badge sent${n.sentiment ?? 0}">${n.sentiment ?? 0}</span></td>
-      <td class="mono dim">${mapped.direct.join(", ") || "–"}</td>
-      <td class="mono dim">${mapped.proxy.join(", ") || "–"}</td>
-      <td>${noSignal ? '<span class="no-signal">no_signal</span>' : ""}</td>
-    `;
-    tr.addEventListener("click", () => selectKeyword(n, tr));
-    kwBody.appendChild(tr);
-  }
-
-  const stockNodes = nodes.filter((n) => n.type === "stock").sort((a, b) => (b.agg ?? 0) - (a.agg ?? 0));
-  const stBody = document.querySelector("#stock-table tbody");
-  stBody.innerHTML = "";
-  for (const n of stockNodes) {
-    const tr = document.createElement("tr");
-    const badge = n.status ? `<span class="badge ${n.status}">${n.status}</span>` : "";
-    tr.innerHTML = `
-      <td class="mono">${n.ticker}</td>
-      <td>${n.label}</td>
-      <td class="dim">${n.sector ?? ""}</td>
-      <td class="mono">${fmt(n.agg)}</td>
-      <td class="mono">${fmt(n.volume_z)}</td>
-      <td>${badge}</td>
-    `;
-    stBody.appendChild(tr);
-  }
-}
-
-function selectKeyword(node, tr) {
-  document.querySelectorAll("#keyword-table tbody tr").forEach((r) => r.classList.remove("selected"));
-  tr.classList.add("selected");
-  const panel = document.getElementById("sparkline-panel");
-  panel.classList.add("visible");
-  document.getElementById("sparkline-title").textContent = node.label;
-
-  const s = state.series[node.id];
-  drawSparkline(document.getElementById("chart-raw"), s ? s.raw : [], "#5b8cff");
-  drawSparkline(document.getElementById("chart-z"), s ? s.z : [], "#35c98f", true);
-}
-
-function drawSparkline(canvas, values, color, showThreshold = false) {
-  const ctx = canvas.getContext("2d");
-  const w = canvas.width, h = canvas.height;
-  ctx.clearRect(0, 0, w, h);
-  if (!values || values.length === 0) return;
-
-  const min = Math.min(...values, 0);
-  const max = Math.max(...values, 0);
-  const span = max - min || 1;
-  const pad = 8;
-  const x = (i) => pad + (i / (values.length - 1 || 1)) * (w - 2 * pad);
-  const y = (v) => h - pad - ((v - min) / span) * (h - 2 * pad);
-
-  if (showThreshold) {
-    ctx.strokeStyle = "rgba(255,180,84,0.4)";
-    ctx.setLineDash([4, 3]);
-    ctx.beginPath();
-    ctx.moveTo(pad, y(2.0));
-    ctx.lineTo(w - pad, y(2.0));
-    ctx.stroke();
-    ctx.setLineDash([]);
-  }
-
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  values.forEach((v, i) => (i === 0 ? ctx.moveTo(x(i), y(v)) : ctx.lineTo(x(i), y(v))));
-  ctx.stroke();
-}
-
-// ---------- Network tab ----------
-
-function renderNetwork() {
-  const canvas = document.getElementById("network-canvas");
-  const rect = canvas.getBoundingClientRect();
-  canvas.width = rect.width * devicePixelRatio;
-  canvas.height = rect.height * devicePixelRatio;
-
-  const colorByType = { keyword: "#5b8cff", sector: "#8b93a7", stock: "#35c98f" };
-  const nodes = state.snapshot.nodes.map((n) => ({
-    ...n,
-    x: Math.random() * rect.width,
-    y: Math.random() * rect.height,
-    vx: 0,
-    vy: 0,
-  }));
-  const byId = Object.fromEntries(nodes.map((n) => [n.id, n]));
-  const edges = state.snapshot.links
-    .filter((l) => byId[l.source] && byId[l.target])
-    .map((l) => ({ ...l, a: byId[l.source], b: byId[l.target] }));
-
-  if (state.sim) cancelAnimationFrame(state.sim);
-
-  function tick() {
-    const W = rect.width, H = rect.height;
-    for (const n of nodes) {
-      let fx = (W / 2 - n.x) * 0.002;
-      let fy = (H / 2 - n.y) * 0.002;
-      for (const other of nodes) {
-        if (other === n) continue;
-        const dx = n.x - other.x, dy = n.y - other.y;
-        const d2 = Math.max(dx * dx + dy * dy, 25);
-        const f = 600 / d2;
-        fx += (dx / Math.sqrt(d2)) * f;
-        fy += (dy / Math.sqrt(d2)) * f;
-      }
-      n.vx = (n.vx + fx) * 0.85;
-      n.vy = (n.vy + fy) * 0.85;
-    }
-    for (const e of edges) {
-      const dx = e.b.x - e.a.x, dy = e.b.y - e.a.y;
-      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-      const target = 90;
-      const f = (dist - target) * 0.01;
-      const fx = (dx / dist) * f, fy = (dy / dist) * f;
-      e.a.vx += fx; e.a.vy += fy;
-      e.b.vx -= fx; e.b.vy -= fy;
-    }
-    for (const n of nodes) {
-      if (n.dragging) continue;
-      n.x += n.vx; n.y += n.vy;
-      n.x = Math.max(10, Math.min(W - 10, n.x));
-      n.y = Math.max(10, Math.min(H - 10, n.y));
-    }
-    draw();
-    state.sim = requestAnimationFrame(tick);
-  }
-
-  const ctx = canvas.getContext("2d");
-  function draw() {
-    ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
-    ctx.clearRect(0, 0, rect.width, rect.height);
-    ctx.strokeStyle = "rgba(139,147,167,0.25)";
-    ctx.lineWidth = 1;
-    for (const e of edges) {
-      ctx.beginPath();
-      ctx.moveTo(e.a.x, e.a.y);
-      ctx.lineTo(e.b.x, e.b.y);
-      ctx.stroke();
-    }
-    for (const n of nodes) {
-      const r = n.type === "keyword" ? 5 : n.type === "stock" ? 6 : 4;
-      ctx.fillStyle = colorByType[n.type] || "#e6e9f0";
-      ctx.beginPath();
-      ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
-      ctx.fill();
-      if (n.type !== "sector") {
-        ctx.fillStyle = "rgba(230,233,240,0.7)";
-        ctx.font = "10px var(--sans)";
-        ctx.fillText(n.label, n.x + r + 3, n.y + 3);
-      }
-    }
-  }
-
-  const tooltip = document.getElementById("tooltip");
-  const drawer = document.getElementById("drawer");
-
-  function nodeAt(px, py) {
-    return nodes.find((n) => Math.hypot(n.x - px, n.y - py) < 10);
-  }
-
-  let dragTarget = null;
-
-  canvas.onmousemove = (ev) => {
-    const px = ev.offsetX, py = ev.offsetY;
-    if (dragTarget) {
-      dragTarget.x = px; dragTarget.y = py;
-      return;
-    }
-    const n = nodeAt(px, py);
-    if (n) {
-      tooltip.style.display = "block";
-      tooltip.style.left = px + 14 + "px";
-      tooltip.style.top = py + 14 + "px";
-      tooltip.textContent = `${n.label} (${n.type})`;
-      canvas.style.cursor = "pointer";
-    } else {
-      tooltip.style.display = "none";
-      canvas.style.cursor = "default";
-    }
-  };
-  canvas.onmousedown = (ev) => {
-    const n = nodeAt(ev.offsetX, ev.offsetY);
-    if (n) { n.dragging = true; dragTarget = n; }
-  };
-  window.addEventListener("mouseup", () => {
-    if (dragTarget) dragTarget.dragging = false;
-    dragTarget = null;
-  });
-  canvas.onclick = (ev) => {
-    const n = nodeAt(ev.offsetX, ev.offsetY);
-    if (!n) { drawer.classList.remove("open"); return; }
-    drawer.innerHTML = `
-      <h3>${n.label}</h3>
-      <dl>
-        <dt>type</dt><dd>${n.type}</dd>
-        ${n.z !== undefined && n.z !== null ? `<dt>z</dt><dd>${fmt(n.z)}</dd>` : ""}
-        ${n.sentiment !== undefined && n.sentiment !== null ? `<dt>sentiment</dt><dd>${n.sentiment}</dd>` : ""}
-        ${n.why ? `<dt>why</dt><dd>${n.why}</dd>` : ""}
-        ${n.ticker ? `<dt>ticker</dt><dd>${n.ticker}</dd>` : ""}
-        ${n.sector ? `<dt>sector</dt><dd>${n.sector}</dd>` : ""}
-        ${n.agg !== undefined && n.agg !== null ? `<dt>agg</dt><dd>${fmt(n.agg)}</dd>` : ""}
-        ${n.volume_z !== undefined && n.volume_z !== null ? `<dt>volume_z</dt><dd>${fmt(n.volume_z)}</dd>` : ""}
-        ${n.status ? `<dt>status</dt><dd>${n.status}</dd>` : ""}
-      </dl>
-    `;
-    drawer.classList.add("open");
-  };
-
-  tick();
-}
-
-// ---------- tabs & bootstrap ----------
-
-document.querySelectorAll("nav.tabs button").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll("nav.tabs button").forEach((b) => b.classList.remove("active"));
-    document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
-    btn.classList.add("active");
-    document.getElementById(`tab-${btn.dataset.tab}`).classList.add("active");
-  });
-});
-
-(async function bootstrap() {
-  const dates = await fetchJSON("/api/dates");
-  const select = document.getElementById("date-select");
-  if (!dates || dates.length === 0) {
-    showEmpty("data/snapshot_*.json이 없습니다. 먼저 `make run`으로 파이프라인을 실행하세요.");
+/* ---------- signal cards ---------- */
+function renderCards(vm){
+  const rest=vm.signals.slice(1);
+  if(rest.length===0){
+    $('#cards').innerHTML=`<span class="pending" style="grid-column:1/-1">추가 신호 없음</span>`;
     return;
   }
-  for (const d of dates) {
-    const opt = document.createElement("option");
-    opt.value = d; opt.textContent = d;
-    select.appendChild(opt);
+  $('#cards').innerHTML=rest.map((s,i)=>{
+    const pos=s.z>=1.0;
+    const to=s.kind==='proxy'
+      ? `<span class="to"><span>프록시</span><span class="t px">${s.ticker??'—'}</span> ${s.company??''}</span>`+
+        (s.proxy_tickers&&s.proxy_tickers.length>1?`<span class="fan">+${s.proxy_tickers.length-1}개사</span>`:'')
+      : `<span class="to"><span class="t">${s.ticker??'—'}</span> ${s.company??'연결된 종목 없음'}</span>`;
+    return `<div class="card" style="animation-delay:${i*70}ms">
+      <div class="top"><div><div class="pname">${s.product}</div><div class="bname">${s.brand} · ${s.sector}</div></div>
+        <div class="z ${pos?'pos':'flat'}">${s.z>0?'+':''}${s.z.toFixed(2)}</div></div>
+      <div class="spark" data-i="${i}"></div>
+      <div class="foot">${to}
+        <span class="badge ${s.status==='react'?'b-react':'b-lead'}">${s.status==='react'?'반응':'선행'}</span></div>
+    </div>`;
+  }).join('');
+  requestAnimationFrame(()=>{document.querySelectorAll('#cards .spark[data-i]').forEach(el=>{
+    const s=rest[+el.dataset.i];spark(el,s.series,s.z>=1.0?C.kw:C.slate,true);});});
+}
+
+/* ---------- distribution (beeswarm) ---------- */
+function renderDistribution(vm){
+  const svg=$('#dist'),W=1000,Hh=150;
+  const all=[...vm.signals.map(s=>({product:s.product,z:s.z})),...vm.flat.map(f=>({product:f.product,z:f.z}))];
+  if(all.length===0){svg.innerHTML='';return;}
+  const zmin=Math.min(-1.5,...all.map(d=>d.z)),zmax=Math.max(3.5,...all.map(d=>d.z));
+  const X=z=>40+(z-zmin)/(zmax-zmin)*(W-80);
+  let out='';
+  const lo=Math.ceil(zmin),hi=Math.floor(zmax);
+  for(let z=lo;z<=hi;z++){out+=`<line x1="${X(z)}" x2="${X(z)}" y1="24" y2="118" stroke="rgba(255,255,255,.05)"/>
+    <text x="${X(z)}" y="138" fill="var(--faint)" font-size="11" font-family="var(--mono)" text-anchor="middle">${z}</text>`;}
+  out+=`<line x1="${X(1.5)}" x2="${X(1.5)}" y1="18" y2="122" stroke="rgba(242,178,62,.35)" stroke-dasharray="3 3"/>`;
+  const rows=[70,54,86,40,100];const used=[];
+  all.slice().sort((a,b)=>a.z-b.z).forEach(d=>{
+    const cx=X(d.z);let ry=0;
+    // 한 x 근방에 rows.length보다 많은 점이 몰리면 자리가 영원히 안 나서 무한루프에
+    // 빠질 수 있다 — 몇 바퀴 돌아도 못 찾으면 그냥 겹쳐서라도 배치한다.
+    const maxTries=rows.length*4;
+    while(ry<maxTries && used.some(u=>Math.abs(u.x-cx)<16 && u.y===rows[ry%rows.length]))ry++;
+    const cy=rows[ry%rows.length];used.push({x:cx,y:cy});
+    const hot=d.z>=1.5;const col=hot?C.kw:C.slate;
+    out+=`<circle cx="${cx}" cy="${cy}" r="${hot?6:4.5}" fill="${col}" fill-opacity="${hot?.95:.5}"
+      stroke="${col}" stroke-opacity=".5"/>`;
+    if(hot)out+=`<text x="${cx}" y="${cy-11}" fill="${col}" font-size="11" font-family="var(--body)" text-anchor="middle">${d.product}</text>`;
+  });
+  svg.innerHTML=out;
+}
+
+/* ---------- value chain flow (product -> brand -> stock) ---------- */
+function renderFlow(vm){
+  const svg=$('#flow'),W=1000,Hh=420;
+  svg.innerHTML='';
+  const signals=vm.signals;
+  if(signals.length===0)return;
+  const reduce=reduceMotion();
+  const stockByTicker=Object.fromEntries(vm.stocks.map(s=>[s.ticker,s]));
+
+  const prods=signals.map(s=>({id:'p_'+s.ticker+s.product,label:s.product,z:s.z,kind:s.kind,
+    fan:s.proxy_tickers,tk:s.ticker,brand:s.brand,co:s.company}));
+  const brandMap={};
+  signals.forEach(s=>{brandMap[s.brand]=brandMap[s.brand]||{id:'b_'+s.brand,label:s.brand};});
+  const stkList={};
+  signals.forEach(s=>{
+    const tks=s.kind==='proxy'&&s.proxy_tickers.length?s.proxy_tickers:[s.ticker];
+    tks.filter(Boolean).forEach(tk=>{
+      const known=stockByTicker[tk];
+      stkList[tk]=stkList[tk]||{id:'s_'+tk,label:known?known.company:(tk===s.ticker?s.company:tk),tk,
+        agg:known?known.agg:Math.max(s.z,0),proxy:false};
+      if(tk!==s.ticker)stkList[tk].proxy=true;
+    });
+  });
+  const brands=Object.values(brandMap),stks=Object.values(stkList);
+  const colX=[150,500,850];
+  const place=(arr,x)=>{const n=arr.length,top=50,bot=Hh-40,gap=(bot-top)/(n>1?n-1:1);
+    arr.forEach((d,i)=>{d.x=x;d.y=n>1?top+i*gap:(top+bot)/2;});};
+  place(prods,colX[0]);place(brands,colX[1]);place(stks,colX[2]);
+  const byBrand=l=>brands.find(b=>b.label===l);
+  const byStk=tk=>stks.find(s=>s.tk===tk);
+  const links=[];
+  signals.forEach(s=>{const b=byBrand(s.brand);const pn=prods.find(p=>p.label===s.product);
+    if(pn&&b)links.push({a:pn,b:b,kind:s.kind});
+    const tks=s.kind==='proxy'&&s.proxy_tickers.length?s.proxy_tickers:[s.ticker];
+    tks.filter(Boolean).forEach(tk=>{const st=byStk(tk);if(b&&st)links.push({a:b,b:st,kind:tk===s.ticker?s.kind:'proxy'});});});
+  const path=(a,b)=>{const mx=(a.x+b.x)/2;return `M${a.x} ${a.y} C${mx} ${a.y} ${mx} ${b.y} ${b.x} ${b.y}`;};
+  const NS='http://www.w3.org/2000/svg';
+  const linkG=document.createElementNS(NS,'g'),pulseG=document.createElementNS(NS,'g'),nodeG=document.createElementNS(NS,'g');
+  const paths=[];
+  links.forEach(l=>{const p=document.createElementNS(NS,'path');
+    p.setAttribute('d',path(l.a,l.b));p.setAttribute('fill','none');
+    const col=l.kind==='proxy'?C.proxy:C.direct;
+    p.setAttribute('stroke',col);p.setAttribute('stroke-opacity','.28');
+    p.setAttribute('stroke-width','1.4');
+    if(l.kind==='proxy')p.setAttribute('stroke-dasharray','4 4');
+    linkG.appendChild(p);paths.push({el:p,kind:l.kind,col});});
+  function node(d,type){
+    const g=document.createElementNS(NS,'g');g.setAttribute('transform',`translate(${d.x},${d.y})`);
+    const c=document.createElementNS(NS,'circle');
+    let r,fill,stroke;
+    if(type==='p'){r=8+Math.max(d.z,0)*3.2;fill=C.kw;stroke=C.kw;}
+    else if(type==='b'){r=8;fill='none';stroke=C.slate;}
+    else {r=8+Math.max(d.agg,0)*3;fill=d.proxy?C.proxy:C.direct;stroke=d.proxy?C.proxy:C.direct;}
+    c.setAttribute('r',r);c.setAttribute('fill',fill);c.setAttribute('fill-opacity',type==='b'?'0':'.9');
+    c.setAttribute('stroke',stroke);c.setAttribute('stroke-opacity',type==='b'?'.7':'.55');c.setAttribute('stroke-width','1.4');
+    g.appendChild(c);
+    const t=document.createElementNS(NS,'text');
+    const left=type==='s';t.setAttribute('x',left?r+8:(type==='p'?-(r+8):0));
+    t.setAttribute('y',type==='b'?-14:4);t.setAttribute('text-anchor',type==='p'?'end':type==='s'?'start':'middle');
+    t.setAttribute('fill',type==='p'?'#f4d79b':type==='s'?'#dfe6f0':'var(--dim)');
+    t.setAttribute('font-size',type==='b'?'11':'12.5');t.setAttribute('font-family','var(--body)');
+    t.textContent=d.label;g.appendChild(t);
+    if(type==='s'){const tk=document.createElementNS(NS,'text');
+      tk.setAttribute('x',r+8);tk.setAttribute('y',18);tk.setAttribute('fill','var(--dim)');
+      tk.setAttribute('font-size','9.5');tk.setAttribute('font-family','var(--mono)');tk.textContent=d.tk;g.appendChild(tk);}
+    nodeG.appendChild(g);
   }
-  select.value = dates[dates.length - 1];
-  select.addEventListener("change", () => loadDate(select.value));
+  prods.forEach(d=>node(d,'p'));brands.forEach(d=>node(d,'b'));stks.forEach(d=>node(d,'s'));
+  svg.appendChild(linkG);svg.appendChild(pulseG);svg.appendChild(nodeG);
+  if(!reduce){
+    const dots=paths.map((p,i)=>{const len=p.el.getTotalLength();
+      const dot=document.createElementNS(NS,'circle');dot.setAttribute('r','2.6');
+      dot.setAttribute('fill',p.col);pulseG.appendChild(dot);
+      return {dot,path:p.el,len,off:(i*0.13)%1};});
+    let t0=null;
+    function tick(ts){if(!t0)t0=ts;const base=((ts-t0)/2600);
+      dots.forEach(d=>{let u=(base+d.off)%1;const pt=d.path.getPointAtLength(u*d.len);
+        d.dot.setAttribute('cx',pt.x);d.dot.setAttribute('cy',pt.y);
+        d.dot.setAttribute('opacity',(Math.sin(u*Math.PI)).toFixed(2));});
+      requestAnimationFrame(tick);}
+    requestAnimationFrame(tick);
+  }
+}
+
+/* ---------- leaderboard ---------- */
+function renderLeaderboard(vm){
+  const{stocks}=vm;
+  if(stocks.length===0){$('#lb').innerHTML=`<span class="pending">아직 관심도가 임계를 넘은 종목이 없습니다</span>`;return;}
+  const maxAgg=Math.max(...stocks.map(s=>s.agg));
+  $('#lb').innerHTML=stocks.map((s,i)=>`
+    <div class="lb-row">
+      <span class="rk">${String(i+1).padStart(2,'0')}</span>
+      <div class="co"><span class="n">${s.company}</span><span class="t">${s.ticker}</span>
+        <span class="lb-feed">${s.feed.length?'← '+s.feed.join(', '):''}</span></div>
+      <div class="lb-bar-track"><div class="lb-bar" data-w="${(s.agg/maxAgg*100).toFixed(0)}"></div></div>
+      <div class="rt"><span class="agg">${s.agg.toFixed(2)}</span>
+        <span class="badge ${s.status==='react'?'b-react':'b-lead'}">${s.status==='react'?'반응':'선행'}</span></div>
+    </div>`).join('');
+  requestAnimationFrame(()=>document.querySelectorAll('.lb-bar').forEach(b=>b.style.width=b.dataset.w+'%'));
+}
+
+/* ---------- detail table ---------- */
+function renderDetail(vm){
+  const rowsAll=[...vm.signals.map(s=>({p:s.product,b:s.brand,z:s.z,co:s.company,tk:s.ticker,sentiment:s.sentiment})),
+    ...vm.flat.map(f=>({p:f.product,b:f.brand||'—',z:f.z,co:f.company,tk:f.ticker||'—',sentiment:f.sentiment}))]
+    .sort((a,b)=>b.z-a.z);
+  $('#detail').innerHTML=`<thead><tr><th>제품</th><th>브랜드</th><th>종목</th><th>티커</th>
+    <th style="text-align:right">z</th><th>감성</th></tr></thead><tbody>`+
+    rowsAll.map(r=>`<tr><td>${r.p}</td><td style="color:var(--dim)">${r.b}</td><td>${r.co??'—'}</td>
+      <td class="num" style="color:var(--dim)">${r.tk??'—'}</td>
+      <td class="num" style="color:${r.z>=1.5?'var(--kw)':'var(--dim)'}">${r.z>0?'+':''}${r.z.toFixed(2)}</td>
+      <td class="pending">${r.sentiment==null?'대기':r.sentiment}</td></tr>`).join('')+`</tbody>`;
+}
+
+/* ---------- orchestration ---------- */
+function renderAll(vm){
+  hideState();
+  renderSummary(vm);
+  renderHero(vm);
+  renderCards(vm);
+  renderDistribution(vm);
+  renderFlow(vm);
+  renderLeaderboard(vm);
+  renderDetail(vm);
+}
+
+async function loadDate(date){
+  showSkeleton();
+  let vm;
+  try{ vm=await fetchJSON(`/api/dashboard/${date}`); }
+  catch(err){ showState('데이터를 불러오지 못했습니다', String(err)); return; }
+  if(!vm){ showState(`${date} 신호가 아직 없습니다`, '다른 날짜를 선택하세요'); return; }
+  renderAll(vm);
+}
+
+(async function bootstrap(){
+  let dates;
+  try{ dates=await fetchJSON('/api/dashboard/dates'); }
+  catch(err){ showState('데이터를 불러오지 못했습니다', String(err)); return; }
+  const select=$('#date-select');
+  if(!dates||dates.length===0){
+    showState('아직 신호 스냅샷이 없습니다','먼저 `make run`으로 파이프라인을 실행하세요');
+    return;
+  }
+  for(const d of dates){
+    const opt=document.createElement('option');
+    opt.value=d;opt.textContent=d;select.appendChild(opt);
+  }
+  select.value=dates[dates.length-1];
+  select.addEventListener('change',()=>loadDate(select.value));
   loadDate(select.value);
 })();
 </script>
