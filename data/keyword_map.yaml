@@ -39,6 +39,15 @@
   direct: ["004370"]
   proxy: []
 
+- product: 로제 신라면
+  brand: 농심
+  sector: ramen_snack
+  direct: ["004370"]
+  proxy: []
+  aliases: ["신라면 로제", "로제 신라면"]
+  # 구글 트렌드 급상승 연관검색어에서 발견(2026-08-14 리서치) — "신라면 팝업 스토어"
+  # 등과 동반 급등. 로제 소스 트렌드를 탄 실제 최근 출시 SKU.
+
 - product: 진라면
   brand: 오뚜기
   sector: ramen_snack
@@ -65,6 +74,15 @@
   direct: ["280360"]
   proxy: []
   brand_to_company: 0.6
+
+- product: 말차 몽쉘
+  brand: 롯데웰푸드
+  sector: ramen_snack
+  direct: ["280360"]
+  proxy: []
+  aliases: ["몽쉘 말차", "말차 몽쉘"]
+  brand_to_company: 0.6
+  # 구글 트렌드 급상승 연관검색어에서 발견(2026-08-14 리서치) — 말차맛 변형 SKU.
 
 - product: 죠리퐁
   brand: 크라운제과
@@ -177,12 +195,21 @@
 # 성분/트렌드 키워드 — 특정 브랜드가 아니라 그 성분을 쓰는 여러 상장사로 확장되는
 # 신호. product_to_brand/brand_to_company 대신 신호 강도 자체를 낮게 잡는다
 # (희석된 간접 신호이므로 개별 기업 판단에 쓰기엔 약함, 발견용 트리거로만 사용).
+#
+# PDRN은 구글 트렌드 급상승 연관검색어 리서치(2026-08-14)로 실제 수혜 브랜드를
+# 확인했다 — 연관검색어 상위가 전부 "medicube pdrn ...", "anua pdrn ..." 등
+# 구체적 제품명. 메디큐브는 에이피알(278470) 소유라 direct로 승격, 나머지
+# 화장품 대형사·ODM은 여전히 약한 proxy로 유지한다. product_to_brand(PDRN
+# 라인이 메디큐브 매출에서 차지하는 비중)·brand_to_company(메디큐브가
+# 에이피알 전사 매출에서 차지하는 비중)는 사업보고서 미검증 추정치다.
 - product: PDRN
-  brand: ""
+  brand: 메디큐브
   sector: cosmetics
-  direct: []
+  direct: ["278470"]
   proxy: ["090430", "051900", "192820"]
-  brand_to_company: 0.3
+  ownership: direct
+  product_to_brand: 0.3 # TODO(human): 메디큐브 매출에서 PDRN 라인 비중 검증
+  brand_to_company: 0.7 # TODO(human): 에이피알 매출에서 메디큐브 비중 검증
 
 - product: 무코팁
   brand: ""
