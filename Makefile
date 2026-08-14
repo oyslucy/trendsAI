@@ -1,4 +1,4 @@
-.PHONY: setup lint test run
+.PHONY: setup lint test run dashboard
 
 DATE ?= $(shell date +%Y-%m-%d)
 
@@ -16,3 +16,6 @@ test:
 
 run:
 	uv run consumer-signal --date $(DATE)
+
+dashboard:
+	uv run uvicorn dashboard.app:app --reload
