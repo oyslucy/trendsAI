@@ -39,13 +39,14 @@ class GoogleTrendsError(RuntimeError):
     """구글 트렌드 요청이 재시도 후에도 실패했을 때."""
 
 
-def _term_for(entry: KeywordEntry) -> str:
+def _term_for(entry: KeywordEntry, geo: str) -> str:
     """엔트리를 구글 트렌드 검색어 term으로 변환한다.
 
-    구글 트렌드는 term 안에서 `+`를 OR로 해석하므로, 네이버 데이터랩의
-    keywordGroups처럼 동의어/변형어를 하나의 term으로 묶을 수 있다.
+    구글 트렌드는 term 안에서 `+`를 OR로 해석하므로, 동의어/변형어를 하나의
+    term으로 묶을 수 있다. `geo_keywords[geo]`가 있으면 그 지역 전용 표현을
+    쓰고, 없으면 기본 aliases → product 순으로 fallback한다.
     """
-    aliases = entry.aliases or [entry.keyword]
+    aliases = entry.geo_keywords.get(geo) or entry.aliases or [entry.product]
     return " + ".join(aliases[:MAX_ALIASES_PER_TERM])
 
 
@@ -135,22 +136,21 @@ def fetch_search_trend_series(
 ) -> dict[str, pd.Series]:
     """엔트리별 `[start_date, end_date]` 트레일링 구글 트렌드 시계열을 가져온다.
 
-    반환값은 `entry.keyword` → `pd.Series(index=date, value=index)`. 요청당
+    반환값은 `entry.product` → `pd.Series(index=date, value=index)`. 요청당
     5개 term 제한에 맞춰 배치로 나눠 요청하고, 배치 결과는
     `cache_dir/<end_date>_<batchhash>.json`에 캐시한다.
     """
     if not entries:
         return {}
 
+    geo = settings.google_trends_geo
     active = pytrends or TrendReq(hl="ko-KR", tz=540)
     series: dict[str, pd.Series] = {}
     for batch in _batches(entries):
-        terms = [_term_for(entry) for entry in batch]
-        df = _request_with_cache(
-            active, terms, start_date, end_date, settings.google_trends_geo, cache_dir
-        )
+        terms = [_term_for(entry, geo) for entry in batch]
+        df = _request_with_cache(active, terms, start_date, end_date, geo, cache_dir)
         for entry, term in zip(batch, terms, strict=True):
-            series[entry.keyword] = _series_from_df(df, term, start_date, end_date)
+            series[entry.product] = _series_from_df(df, term, start_date, end_date)
     return series
 
 
@@ -160,7 +160,7 @@ def probe(keyword: str, settings: Settings, *, days: int = 30) -> None:
 
     end_date = Date.today()
     start_date = end_date - timedelta(days=days)
-    entry = KeywordEntry(keyword=keyword, brand="", sector="", direct=[], proxy=[], weight=1.0)
+    entry = KeywordEntry(product=keyword, brand="", sector="", direct=[], proxy=[])
     series_map = fetch_search_trend_series([entry], start_date, end_date, settings)
     series = series_map.get(keyword)
     if series is None:

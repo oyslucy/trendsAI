@@ -52,30 +52,30 @@ def build_snapshot(
 
     sectors_seen: set[str] = set()
     universe_by_ticker = {u.ticker: u for u in universe}
-    # ticker -> [(keyword, weight, "direct"|"proxy"), ...]
+    # ticker -> [(product, weight, "direct"|"proxy"), ...]
     ticker_links: dict[str, list[tuple[str, float, str]]] = {}
 
     for entry in keywords:
-        z = 0.0 if keyword_no_signal.get(entry.keyword, True) else keyword_z.get(entry.keyword, 0.0)
+        z = 0.0 if keyword_no_signal.get(entry.product, True) else keyword_z.get(entry.product, 0.0)
         nodes.append(
             Node(
-                id=entry.keyword,
+                id=entry.product,
                 type="keyword",
-                label=entry.keyword,
+                label=entry.product,
                 z=z,
-                sentiment=keyword_sentiment.get(entry.keyword, 0),
+                sentiment=keyword_sentiment.get(entry.product, 0),
             )
         )
 
         sectors_seen.add(entry.sector)
-        links.append(Link(source=entry.keyword, target=entry.sector, kind="sec"))
+        links.append(Link(source=entry.product, target=entry.sector, kind="sec"))
 
         for ticker in entry.direct:
-            links.append(Link(source=entry.keyword, target=ticker, kind="direct"))
-            ticker_links.setdefault(ticker, []).append((entry.keyword, entry.weight, "direct"))
+            links.append(Link(source=entry.product, target=ticker, kind="direct"))
+            ticker_links.setdefault(ticker, []).append((entry.product, entry.weight, "direct"))
         for ticker in entry.proxy:
-            links.append(Link(source=entry.keyword, target=ticker, kind="proxy"))
-            ticker_links.setdefault(ticker, []).append((entry.keyword, entry.weight, "proxy"))
+            links.append(Link(source=entry.product, target=ticker, kind="proxy"))
+            ticker_links.setdefault(ticker, []).append((entry.product, entry.weight, "proxy"))
 
     for sector in sorted(sectors_seen):
         nodes.append(Node(id=sector, type="sector", label=sector))

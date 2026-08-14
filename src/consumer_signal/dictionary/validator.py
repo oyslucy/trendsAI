@@ -19,13 +19,13 @@ def validate_keyword_map(keywords: list[KeywordEntry], universe: list[UniverseEn
 
     for entry in keywords:
         if not entry.direct and not entry.proxy:
-            warnings.append(f"unmapped: '{entry.keyword}' has no direct/proxy tickers")
+            warnings.append(f"unmapped: '{entry.product}' has no direct/proxy tickers")
             continue
 
         for ticker in [*entry.direct, *entry.proxy]:
             if ticker not in known_tickers:
                 raise DictionaryValidationError(
-                    f"'{entry.keyword}' references unknown ticker '{ticker}' "
+                    f"'{entry.product}' references unknown ticker '{ticker}' "
                     "not present in universe.csv"
                 )
 

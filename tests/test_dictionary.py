@@ -36,13 +36,31 @@ def test_seed_data_validates_without_error(data_dir: Path) -> None:
 
 
 def test_unknown_ticker_raises() -> None:
-    keywords = [KeywordEntry(keyword="k", brand="b", sector="s", direct=["999999"], proxy=[])]
+    keywords = [KeywordEntry(product="k", brand="b", sector="s", direct=["999999"], proxy=[])]
     universe = [UniverseEntry(ticker="003230", name="삼양식품", sector="ramen_snack")]
     with pytest.raises(DictionaryValidationError, match="999999"):
         validate_keyword_map(keywords, universe)
 
 
 def test_unmapped_keyword_warns() -> None:
-    keywords = [KeywordEntry(keyword="k", brand="b", sector="s", direct=[], proxy=[])]
+    keywords = [KeywordEntry(product="k", brand="b", sector="s", direct=[], proxy=[])]
     warnings = validate_keyword_map(keywords, universe=[])
     assert any("unmapped" in w for w in warnings)
+
+
+def test_weight_defaults_to_full_materiality() -> None:
+    entry = KeywordEntry(product="k", brand="b", sector="s")
+    assert entry.weight == 1.0
+
+
+def test_weight_is_product_to_brand_times_brand_to_company() -> None:
+    entry = KeywordEntry(
+        product="k", brand="b", sector="s", product_to_brand=0.6, brand_to_company=0.35
+    )
+    assert entry.weight == pytest.approx(0.21)
+
+
+def test_geo_keywords_defaults_to_empty() -> None:
+    entry = KeywordEntry(product="k", brand="b", sector="s")
+    assert entry.geo_keywords == {}
+    assert entry.ownership == "direct"

@@ -20,15 +20,19 @@ def _settings() -> Settings:
     return Settings(llm_api_key="key")  # type: ignore[call-arg]
 
 
-def _entry(keyword: str, aliases: list[str] | None = None) -> KeywordEntry:
+def _entry(
+    product: str,
+    aliases: list[str] | None = None,
+    geo_keywords: dict[str, list[str]] | None = None,
+) -> KeywordEntry:
     return KeywordEntry(
-        keyword=keyword,
+        product=product,
         brand="",
         sector="s",
         direct=[],
         proxy=[],
-        weight=1.0,
         aliases=aliases or [],
+        geo_keywords=geo_keywords or {},
     )
 
 
@@ -69,11 +73,17 @@ def test_batches_respect_group_limit() -> None:
 
 def test_term_for_uses_aliases_when_present() -> None:
     entry = _entry("k", aliases=["a", "b"])
-    assert _term_for(entry) == "a + b"
+    assert _term_for(entry, "KR") == "a + b"
 
 
-def test_term_for_falls_back_to_keyword() -> None:
-    assert _term_for(_entry("k")) == "k"
+def test_term_for_falls_back_to_product() -> None:
+    assert _term_for(_entry("k"), "KR") == "k"
+
+
+def test_term_for_prefers_geo_keywords_over_aliases() -> None:
+    entry = _entry("부스터프로", aliases=["부스터 프로"], geo_keywords={"US": ["booster pro"]})
+    assert _term_for(entry, "US") == "booster pro"
+    assert _term_for(entry, "KR") == "부스터 프로"
 
 
 def test_fetch_search_trend_series_parses_and_reindexes(tmp_path) -> None:

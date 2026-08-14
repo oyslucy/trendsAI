@@ -1,173 +1,192 @@
-# keyword_map.yaml — 검색 키워드 → 종목 매핑 시드 (20~30행)
+# keyword_map.yaml — 검색 키워드 → 브랜드 → 상장사 매핑 시드
 #
 # 스키마 (dictionary/loader.py::KeywordEntry):
-#   keyword: str        # 구글 트렌드에 조회할 검색어
-#   brand:   str         # 대표 브랜드명
-#   sector:  str          # universe.csv의 sector와 정렬
-#   direct:  [ticker...]  # 검색어가 곧 이 종목의 매출로 직결되는 티커
-#   proxy:   [ticker...]  # 간접/유사 수혜가 예상되는 티커 (direct보다 약한 연결)
-#   weight:  float        # 신호 집계 시 가중치 (기본 1.0)
+#   product:           str   # 실제로 검색되는 제품/SKU 레벨 표현 (구글 트렌드 조회어)
+#   brand:             str   # 브랜드명 — 상장사 사명과 다를 수 있음(예: 메디큐브 ≠ 에이피알)
+#   sector:            str   # universe.csv의 sector와 정렬
+#   direct:            [ticker...]  # 검색어가 곧 이 종목의 매출로 직결되는 티커
+#   proxy:             [ticker...]  # 간접/유사 수혜가 예상되는 티커 (direct보다 약한 연결)
+#   aliases:           [str...]     # 동의어/변형어. 구글 트렌드 term에 OR(+)로 결합
+#   geo_keywords:      {geo: [str...]}  # geo별 검색어 override. 없으면 aliases→product 순 fallback
+#   product_to_brand:  float  # 제품이 브랜드 매출에서 차지하는 비중 근사치 (기본 1.0 = 미리서치)
+#   brand_to_company:  float  # 브랜드가 상장사 전사 매출에서 차지하는 비중 근사치 (기본 1.0 = 미리서치)
+#   ownership:         direct | equity_method | distribution
 #
-# 아래는 시드 데이터. 나머지 종목/키워드는 사람이 리서치 후 이어서 채운다.
-# TODO(human): 유제품/주류/리테일/화장품 섹터 키워드 추가 확충
+# 가중치 원칙: product_to_brand × brand_to_company가 신호 집계 가중치(KeywordEntry.weight)다.
+# 기본값 1.0/1.0은 "사업보고서 기준 리서치 전"이라는 뜻이지 실제 비중이 100%라는 뜻이 아니다.
+# 다중 브랜드/사업부 보유 기업(CJ제일제당·하이트진로·LG생활건강 등)은 매출 비중을
+# 사람이 사업보고서·IR 자료로 리서치해서 brand_to_company를 채워야 정확해진다.
+#
+# 키워드 원칙: generic 트렌드어("○○ 신상", "○○ 인기템") 금지 — 실제로 검색되는
+# 표현만. 히어로 SKU·신제품·성분 키워드 위주로 채운다.
+#
+# TODO(human):
+#   - GS리테일(007070)·BGF리테일(282330)에 매핑된 키워드 없음. 편의점 PB 바이럴
+#     상품은 월 단위로 바뀌므로 현재 트렌드 상품으로 채워야 한다(추측으로 채우지 않음).
+#   - product_to_brand / brand_to_company는 대부분 기본값(1.0)이다. 다중 브랜드
+#     보유 기업 위주로 사업보고서 부문별 매출 비중을 리서치해 채울 것.
+#   - geo_keywords는 아직 비어있다(P1: 해외 geo 수집 붙을 때 채움).
 
-- keyword: 불닭볶음면
+- product: 불닭볶음면
   brand: 삼양식품
   sector: ramen_snack
   direct: ["003230"]
   proxy: []
-  weight: 1.0
 
-- keyword: 신라면
+- product: 신라면
   brand: 농심
   sector: ramen_snack
   direct: ["004370"]
   proxy: []
-  weight: 1.0
 
-- keyword: 진라면
+- product: 진라면
   brand: 오뚜기
   sector: ramen_snack
   direct: ["007310"]
   proxy: []
-  weight: 1.0
 
-- keyword: 비비고 만두
+- product: 비비고 만두
   brand: CJ제일제당
   sector: ramen_snack
   direct: ["097950"]
   proxy: []
-  weight: 1.0
+  brand_to_company: 0.5 # CJ제일제당은 식품 외 바이오·물류 사업부도 보유 — TODO(human): 부문별 매출 비중 검증
 
-- keyword: 초코파이
+- product: 초코파이
   brand: 오리온
   sector: ramen_snack
   direct: ["271560"]
   proxy: []
-  weight: 0.8
+  brand_to_company: 0.8
 
-- keyword: 몽쉘
+- product: 몽쉘
   brand: 롯데웰푸드
   sector: ramen_snack
   direct: ["280360"]
   proxy: []
-  weight: 0.6
+  brand_to_company: 0.6
 
-- keyword: 죠리퐁
+- product: 죠리퐁
   brand: 크라운제과
   sector: ramen_snack
   direct: ["005740"]
   proxy: []
-  weight: 0.5
+  brand_to_company: 0.5
 
-- keyword: 청정원
-  brand: 대상
+- product: 청정원 순창고추장
+  brand: 청정원
   sector: ramen_snack
   direct: ["001680"]
   proxy: []
-  weight: 0.7
+  aliases: ["청정원 순창", "순창고추장"]
+  brand_to_company: 0.7
 
-- keyword: 바나나맛우유
+- product: 바나나맛우유
   brand: 빙그레
   sector: dairy_beverage
   direct: ["005180"]
   proxy: []
-  weight: 1.0
 
-- keyword: 상하목장
-  brand: 매일유업
+- product: 상하목장
+  brand: 상하목장
   sector: dairy_beverage
   direct: ["267980"]
   proxy: []
-  weight: 0.7
+  brand_to_company: 0.7
 
-- keyword: 남양유업 불가리스
+- product: 불가리스
   brand: 남양유업
   sector: dairy_beverage
   direct: ["003920"]
   proxy: []
-  weight: 0.6
+  aliases: ["남양유업 불가리스"]
+  brand_to_company: 0.6
 
-- keyword: 동원참치
-  brand: 동원F&B
+- product: 동원참치
+  brand: 동원참치
   sector: dairy_beverage
   direct: ["049770"]
   proxy: []
-  weight: 0.8
+  brand_to_company: 0.8
 
-- keyword: 참이슬
-  brand: 하이트진로
+- product: 참이슬
+  brand: 참이슬
   sector: alcohol_beverage
   direct: ["000080"]
   proxy: []
-  weight: 1.0
 
-- keyword: 테라 맥주
-  brand: 하이트진로
+- product: 테라
+  brand: 테라
   sector: alcohol_beverage
   direct: ["000080"]
   proxy: []
-  weight: 0.9
+  aliases: ["테라 맥주"]
+  brand_to_company: 0.9
 
-- keyword: 칠성사이다
-  brand: 롯데칠성
+- product: 칠성사이다
+  brand: 칠성사이다
   sector: alcohol_beverage
   direct: ["005300"]
   proxy: []
-  weight: 0.8
+  brand_to_company: 0.8
 
-- keyword: 소주 다이어트
-  brand: ""
+- product: 진로이즈백
+  brand: 진로
   sector: alcohol_beverage
-  direct: []
-  proxy: ["000080", "005300"]
-  weight: 0.4
+  direct: ["000080"]
+  proxy: []
+  aliases: ["진로 이즈백"]
+  brand_to_company: 0.4 # 원소주 등 뉴트로 소주 트렌드의 대표 SKU 하나일 뿐, 회사 전체로는 약한 신호
 
-- keyword: 삼립호빵
+- product: 삼립호빵
   brand: SPC삼립
   sector: bakery
   direct: ["005610"]
   proxy: []
-  weight: 0.9
+  brand_to_company: 0.9
 
-- keyword: 풀무원 두부
+- product: 풀무원 두부
   brand: 풀무원
   sector: bakery
   direct: ["017810"]
   proxy: []
-  weight: 0.7
+  brand_to_company: 0.7
 
-- keyword: 편의점 신상
-  brand: ""
-  sector: retail
-  direct: []
-  proxy: ["007070", "282330"]
-  weight: 0.5
-
-- keyword: 이마트 할인
-  brand: 이마트
+- product: 노브랜드
+  brand: 노브랜드
   sector: retail
   direct: ["139480"]
   proxy: []
-  weight: 0.7
+  aliases: ["노브랜드 이마트", "No Brand"]
+  brand_to_company: 0.3 # 이마트 전체 매출 대비 PB 한 라인의 비중은 작음 — TODO(human): 검증
 
-- keyword: 설화수
-  brand: 아모레퍼시픽
+- product: 설화수
+  brand: 설화수
   sector: cosmetics
   direct: ["090430"]
   proxy: []
-  weight: 1.0
 
-- keyword: 후 화장품
-  brand: LG생활건강
+- product: 후 비첩
+  brand: 후
   sector: cosmetics
   direct: ["051900"]
   proxy: []
-  weight: 0.9
+  aliases: ["후 비첩 자생 에센스", "후 화장품"]
+  brand_to_company: 0.9
 
-- keyword: 올리브영 인기템
+# 성분/트렌드 키워드 — 특정 브랜드가 아니라 그 성분을 쓰는 여러 상장사로 확장되는
+# 신호. product_to_brand/brand_to_company 대신 신호 강도 자체를 낮게 잡는다
+# (희석된 간접 신호이므로 개별 기업 판단에 쓰기엔 약함, 발견용 트리거로만 사용).
+- product: PDRN
   brand: ""
   sector: cosmetics
   direct: []
   proxy: ["090430", "051900", "192820"]
-  weight: 0.5
+  brand_to_company: 0.3
+
+- product: 무코팁
+  brand: ""
+  sector: cosmetics
+  direct: []
+  proxy: ["090430", "051900", "192820"]
+  brand_to_company: 0.3

@@ -8,12 +8,11 @@ from consumer_signal.snapshot import build_snapshot
 
 def _keyword(ticker: str = "003230") -> KeywordEntry:
     return KeywordEntry(
-        keyword="불닭볶음면",
+        product="불닭볶음면",
         brand="삼양식품",
         sector="ramen_snack",
         direct=[ticker],
         proxy=[],
-        weight=1.0,
     )
 
 
@@ -102,7 +101,12 @@ def test_links_cover_direct_sec_own_kinds() -> None:
 
 def test_proxy_only_ticker_gets_proxy_sub() -> None:
     keyword = KeywordEntry(
-        keyword="편의점 신상", brand="", sector="retail", direct=[], proxy=["007070"], weight=0.5
+        product="편의점 신상",
+        brand="",
+        sector="retail",
+        direct=[],
+        proxy=["007070"],
+        brand_to_company=0.5,
     )
     universe = [UniverseEntry(ticker="007070", name="GS리테일", sector="retail")]
     snapshot = build_snapshot(

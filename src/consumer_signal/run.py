@@ -42,12 +42,12 @@ def _score_keywords(
     z_series: dict[str, pd.Series] = {}
 
     for entry in keywords:
-        series = raw_search.get(entry.keyword, pd.Series(dtype=float))
+        series = raw_search.get(entry.product, pd.Series(dtype=float))
         no_signal = is_no_signal(series)
-        keyword_no_signal[entry.keyword] = no_signal
-        keyword_z[entry.keyword] = 0.0 if no_signal else latest_zscore(series, z_window)
-        z_series[entry.keyword] = winsorize(rolling_zscore(series, z_window))
-        keyword_sentiment[entry.keyword] = gate_sentiment(entry.keyword)
+        keyword_no_signal[entry.product] = no_signal
+        keyword_z[entry.product] = 0.0 if no_signal else latest_zscore(series, z_window)
+        z_series[entry.product] = winsorize(rolling_zscore(series, z_window))
+        keyword_sentiment[entry.product] = gate_sentiment(entry.product)
 
     return keyword_z, keyword_no_signal, keyword_sentiment, z_series
 
