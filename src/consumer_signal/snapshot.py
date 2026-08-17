@@ -132,6 +132,14 @@ def dump_snapshot(snapshot: Snapshot, out_dir: Path) -> Path:
     return out_path
 
 
+def load_snapshot(target_date: Date, data_dir: Path) -> Snapshot | None:
+    """`data/snapshot_<date>.json`을 읽는다. 그 날짜 스냅샷이 없으면 None."""
+    path = data_dir / f"snapshot_{target_date.isoformat()}.json"
+    if not path.exists():
+        return None
+    return Snapshot.model_validate_json(path.read_text(encoding="utf-8"))
+
+
 def dump_debug_series(
     target_date: Date,
     raw_series: dict[str, pd.Series],

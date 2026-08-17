@@ -156,5 +156,31 @@ def run(
     run_pipeline(target_date, settings)
 
 
+@app.command()
+def backtest(
+    date: str = typer.Option(..., "--date", help="추천이 나갔던 날짜 (YYYY-MM-DD)"),
+    horizon: int = typer.Option(3, "--horizon", help="그로부터 며칠 뒤와 비교할지"),
+) -> None:
+    """그날 워치리스트에 올랐던 신호가 horizon일 뒤 실제로 반응했는지 확인한다."""
+    from consumer_signal.backtest import evaluate_outcomes
+
+    target_date = Date.fromisoformat(date)
+    outcomes = evaluate_outcomes(target_date, horizon, DATA_DIR)
+    to_date = target_date + timedelta(days=horizon)
+
+    if not outcomes:
+        typer.echo(f"{target_date}에는 워치리스트에 오른 신호가 없습니다.")
+        return
+
+    typer.echo(f"{target_date} 워치리스트 → {to_date} 결과 ({len(outcomes)}건)\n")
+    for o in outcomes:
+        flag = "PENDING" if o.pending else ("반응함" if o.reacted else "-")
+        typer.echo(
+            f"{o.product:15s} score={o.recommended_score:5.2f}  "
+            f"{o.status_then or '-':>5s} → {o.status_now or '-':<5s}  "
+            f"agg {o.agg_then}→{o.agg_now}  [{flag}]"
+        )
+
+
 if __name__ == "__main__":
     app()
